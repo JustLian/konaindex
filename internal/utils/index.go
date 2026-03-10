@@ -36,7 +36,15 @@ func GetPosts(tags string, limit int, page int) ([]KonachanPost, error) {
 	url += strings.Join(elems, "&")
 
 	// making the request
-	resp, err := http.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "KonaIndex/1.0 (https://github.com/JustLian/konaindex)")
+	req.Header.Set("Accept", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
