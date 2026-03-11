@@ -19,6 +19,7 @@ type KonachanPost struct {
 	Height     int    `json:"height"`
 	Score      int    `json:"score"`
 	FileSize   int    `json:"file_size"`
+	Status     string `json:"status"`
 }
 
 // Fetches a slice of KonachanPost from the API
@@ -68,6 +69,10 @@ func InsertPosts(kPosts []KonachanPost) []models.Post {
 	inserted := []models.Post{}
 
 	for _, kp := range kPosts {
+
+		if kp.Status == "deleted" {
+			continue
+		}
 
 		post := models.Post{
 			KonachanID: kp.ID,
