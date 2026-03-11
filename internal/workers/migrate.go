@@ -38,10 +38,19 @@ func FastSaturateMissingMetadata() {
 
 	for cursor >= minID {
 		url := fmt.Sprintf("https://konachan.net/post.json?limit=100&tags=id:<%d", cursor)
-		resp, err := http.Get(url)
-
+		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
-			fmt.Printf("[Migration] Network error at cursor %d: %v\n", cursor, err)
+			fmt.Printf("[Migration] Error creating request at cursor %d: %v\n", cursor, err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		req.Header.Set("User-Agent", "KonaIndex/1.0 (https://github.com/JustLian/konaindex)")
+		req.Header.Set("Accept", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			fmt.Printf("[Migration] Error making request at cursor %d: %v\n", cursor, err)
 			time.Sleep(5 * time.Second)
 			continue
 		}
@@ -52,7 +61,6 @@ func FastSaturateMissingMetadata() {
 			resp.Body.Close()
 			break
 		}
-		resp.Body.Close()
 
 		batchUpdated := 0
 		lowestIDInBatch := cursor // Track this to advance the pagination
@@ -81,6 +89,7 @@ func FastSaturateMissingMetadata() {
 		}
 
 		fmt.Printf("[Migration] Scanned 100 posts (Cursor: %d). Fetched: %d. Updated: %d. Total Fixed: %d\n", cursor, len(kResp), batchUpdated, totalUpdated)
+		resp.Body.Close()
 
 		// 3. Move the cursor down for the next loop
 		cursor = lowestIDInBatch
