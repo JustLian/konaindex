@@ -21,10 +21,9 @@ func main() {
 	database.Connect(cfg.DatabaseURL)
 
 	// Starting workers
-	// workers.StartPool(cfg.WorkerCount)
-	// workers.StartSync()
-	// workers.StartCatchup(cfg.HistoricalCapID)
-	workers.FastSaturateMissingMetadata()
+	workers.StartPool(cfg.WorkerCount)
+	workers.StartSync()
+	workers.StartCatchup(cfg.HistoricalCapID)
 
 	// Basic chi setup
 	r := chi.NewRouter()
