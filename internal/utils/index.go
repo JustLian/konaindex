@@ -15,6 +15,10 @@ type KonachanPost struct {
 	FileURL    string `json:"jpeg_url"`
 	PreviewURL string `json:"preview_url"`
 	Rating     string `json:"rating"`
+	Width      int    `json:"width"`
+	Height     int    `json:"height"`
+	Score      int    `json:"score"`
+	FileSize   int    `json:"file_size"`
 }
 
 // Fetches a slice of KonachanPost from the API
@@ -36,7 +40,15 @@ func GetPosts(tags string, limit int, page int) ([]KonachanPost, error) {
 	url += strings.Join(elems, "&")
 
 	// making the request
-	resp, err := http.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "KonaIndex/1.0 (https://github.com/JustLian/konaindex)")
+	req.Header.Set("Accept", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -63,6 +75,10 @@ func InsertPosts(kPosts []KonachanPost) []models.Post {
 			ImageURL:   kp.FileURL,
 			PreviewURL: kp.PreviewURL,
 			Rating:     kp.Rating,
+			Width:      kp.Width,
+			Height:     kp.Height,
+			Score:      kp.Score,
+			FileSize:   kp.FileSize,
 		}
 
 		result := database.DB.Where(models.Post{KonachanID: kp.ID}).FirstOrCreate(&post)
