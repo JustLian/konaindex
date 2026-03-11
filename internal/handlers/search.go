@@ -18,6 +18,7 @@ type SearchRequest struct {
 	ExcludeTags  []string    `json:"exclude_tags"`
 	TargetColors [][]float32 `json:"target_colors"`
 	Limit        int         `json:"limit"`
+	Page         int         `json:"page"`
 }
 
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
@@ -98,14 +99,22 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 		query = query.Where("NOT tags && ?", pq.StringArray(req.ExcludeTags))
 	}
 
-	limit := req.Limit
-	if limit <= 0 {
-		limit = 20
+	// pagination
+	pageSize := req.Limit
+	if pageSize <= 0 {
+		pageSize = 20
 	}
+
+	page := req.Page
+	if page < 1 {
+		page = 1
+	}
+
+	offset := (page - 1) * pageSize
 
 	var results []models.Post
 
-	if err := query.Preload("Palette").Limit(limit).Find(&results).Error; err != nil {
+	if err := query.Preload("Palette").Limit(pageSize).Offset(offset).Find(&results).Error; err != nil {
 		WriteError(w, http.StatusInternalServerError, "Failed to search posts: "+err.Error())
 		return
 	}

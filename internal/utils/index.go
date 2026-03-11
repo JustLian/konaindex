@@ -15,6 +15,10 @@ type KonachanPost struct {
 	FileURL    string `json:"jpeg_url"`
 	PreviewURL string `json:"preview_url"`
 	Rating     string `json:"rating"`
+	Width      int    `json:"width"`
+	Height     int    `json:"height"`
+	Score      int    `json:"score"`
+	FileSize   int    `json:"file_size"`
 }
 
 // Fetches a slice of KonachanPost from the API
@@ -71,6 +75,10 @@ func InsertPosts(kPosts []KonachanPost) []models.Post {
 			ImageURL:   kp.FileURL,
 			PreviewURL: kp.PreviewURL,
 			Rating:     kp.Rating,
+			Width:      kp.Width,
+			Height:     kp.Height,
+			Score:      kp.Score,
+			FileSize:   kp.FileSize,
 		}
 
 		result := database.DB.Where(models.Post{KonachanID: kp.ID}).FirstOrCreate(&post)

@@ -13,8 +13,12 @@ type Post struct {
 	ImageURL   string `gorm:"not null"`
 	PreviewURL string `gorm:"not null"`
 
-	Tags   pq.StringArray `gorm:"type:text[];index:,type:gin"`
-	Rating string         `gorm:"type:varchar(1);index"`
+	Tags     pq.StringArray `gorm:"type:text[];index:,type:gin"`
+	Rating   string         `gorm:"type:varchar(1);index"`
+	Width    int
+	Height   int
+	Score    int
+	FileSize int
 
 	Temperature float64     `gorm:"type:float"`
 	Palette     []PostColor `gorm:"foreignKey:PostID"`

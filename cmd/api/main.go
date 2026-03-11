@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 )
 
 func main() {
@@ -20,14 +21,22 @@ func main() {
 	database.Connect(cfg.DatabaseURL)
 
 	// Starting workers
-	workers.StartPool(cfg.WorkerCount)
-	workers.StartSync()
-	workers.StartCatchup(cfg.HistoricalCapID)
+	// workers.StartPool(cfg.WorkerCount)
+	// workers.StartSync()
+	// workers.StartCatchup(cfg.HistoricalCapID)
+	workers.FastSaturateMissingMetadata()
 
 	// Basic chi setup
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:*", "http://127.0.0.1:*", "https://konaindex.rian.moe"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
 
 	handlers.SetupRouters(r)
 
